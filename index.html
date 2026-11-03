@@ -65,7 +65,7 @@ header h1{font-size:20px!important;line-height:1.25}
 @media(min-width:751px){#detailPanel{right:12px;max-width:380px}}
 </style></head><body><header><h1>다록 DAROK</h1></header><div class="mobileNav"><button id="tabList" class="active">배송현황</button><button id="tabMap">지도</button><button id="openSettings" title="설정" aria-label="설정">⚙</button></div><div class="wrap"><aside><section id="courseManager" style="border:1px solid #bfd3e9;border-radius:10px;padding:10px;margin-bottom:10px;background:#f1f7fd"><b>배송 코스</b><div class="line"><select id="courseSelect" style="flex:1;min-width:0" aria-label="코스 선택"></select><button id="newCourse">+ 새 코스</button></div><div id="courseMeta" style="font-size:12px;color:#526579;margin-bottom:6px"></div><div class="line"><button id="courseImport">CSV 배송목록 등록</button><button id="renameCourse">이름 수정</button><button id="deleteCourse">코스 삭제</button></div><input type="file" id="courseCsv" accept=".csv,text/csv" hidden><small>코스별 배송상태·순서 별도 저장 · 이 기기에서만 보관</small></section><div class="adminOnly"><b>1. 지도 연결</b><p id="notice">카카오 지도를 자동으로 연결하는 중입니다.</p></div><div class="routebox" id="routeControls"><b>배송순서 · 지도에서 지정</b><div id="routeState">배송목록을 불러오세요.</div><div class="line routeSaveRow"><button id="saveRoute" class="primary">순서 저장</button><button id="resetSavedRoute">순서 초기화</button></div><div id="routeList"></div><button id="startRoute" type="button" hidden>순서 정하기</button><small>지도에서 건물을 순서대로 클릭하세요. 같은 건물의 여러 배송은 한 번만 선택합니다. 저장된 경로는 다음 접속에도 유지됩니다(현재 브라우저).</small></div><div id="settingsData"><div class="line"><button id="backup">배송기록 백업 내려받기</button><label>백업 복원 <input id="restoreBackup" type="file" accept=".json,application/json"></label></div><div id="storageHint" style="font-size:12px;color:#167047;margin:5px 0">배송 상태는 이 기기에 자동 저장됩니다.</div><b>오늘의 배송</b><div class="line"><button id="sample">샘플 30건 (목표 16곳)</button><input id="csv" type="file" accept=".csv,text/csv"><button id="reset">상태 초기화</button></div><small>CSV 열: 수령인,배송대상,주소,상세주소,수량,배달순서,상호명,건물명,연락처,배송메모(선택). UTF-8 권장. 같은 건물은 동일한 기본주소로 입력하세요.</small></div><p id="stats"></p><div id="timePanel" class="routebox"><b>배송시간 (선택)</b><div id="timeStatus">시작 전</div><div class="line"><button id="startTime">배송 시작</button><button id="endTime">배송 종료</button></div></div><div id="filterPanel" class="line"><button data-filter="대기" class="activeFilter">배송중</button><button data-filter="배송완료">배송완료</button><button data-filter="배송불가">배송불가</button></div><div id="list"></div></aside><div class="mapArea"><div id="mapTools"><button id="toggleRouteTools" type="button">순서 설정 ▾</button><button id="fitAll" type="button" aria-label="배송처 전체 보기">전체 보기</button><label><input type="checkbox" id="hide"> 완료 숨기기</label></div><div id="mapRouteMount" class="routeDrawer"></div><div id="map" aria-label="카카오 지도"></div><div class="mapHint">배송처를 누르면 길찾기·전화·문자·상태 변경을 할 수 있습니다. 파랑=배송중, 주황=일부 처리, 초록=전체 처리.</div></div></div><section id="detailPanel" role="dialog" aria-label="배송처 상세정보"><button class="close" id="closeDetail">닫기 ✕</button><div id="detailBody"></div></section><section id="settingsPanel" role="dialog" aria-label="설정"><div class="settingsHead"><b>설정 · 시험판 데이터 관리</b><button id="closeSettings">닫기 ✕</button></div><div id="settingsMount"></div><small>서버·관리자 모드가 도입되면 배송처 등록과 데이터 보관은 관리자 측에서 처리할 예정입니다.</small></section><script>
 const KAKAO_JS_KEY = (window.BAEDALMAP_CONFIG && window.BAEDALMAP_CONFIG.kakaoJavaScriptKey) || '';
-const $=id=>document.getElementById(id);let map,geocoder,markers=[],records=[],groups=[];let pendingMapRecipient=null;let highlightedAddress=null;let savedRoute=[],previousRoute=[],routeDraft=[],routeMode=false,routeLine=null,datasetKey="",listFilter="대기",detailStableAddress=null,detailStableIds=null;const SAMPLE_ADDR='서울 종로구 사직로8길 4';const food=[["청진옥","서울 종로구 종로3길 32"],["광화문미진","서울 종로구 종로 19"],["광화문국밥","서울 중구 세종대로21길 53"],["우육면관 광화문점","서울 종로구 종로7길 29-14"],["무탄 광화문점","서울 종로구 새문안로 68"],["우아라","서울 종로구 종로1길 50"],["해목 경복궁점","서울 종로구 자하문로 26-1"],["칸다소바 경복궁점","서울 종로구 자하문로7길 5"],["광화문뚝감","서울 종로구 새문안로3길 21"],["모던샤브하우스 광화문점","서울 종로구 종로3길 17"],["종로도담","서울 종로구 삼봉로 78"],["잘빠진메밀 서촌본점","서울 종로구 자하문로11길 4"],["서촌계단집","서울 종로구 자하문로1길 15"],["만석꾼","서울 종로구 자하문로2길 9"],["서촌전통순대국","서울 종로구 사직로9가길 8"]];const geoCache=new Map();
+const $=id=>document.getElementById(id);let map,geocoder,markers=[],records=[],groups=[];let pendingMapRecipient=null;let highlightedAddress=null;let pulseTimer=null;let pulseOn=true;let savedRoute=[],previousRoute=[],routeDraft=[],routeMode=false,routeLine=null,datasetKey="",listFilter="대기",detailStableAddress=null,detailStableIds=null;const SAMPLE_ADDR='서울 종로구 사직로8길 4';const food=[["청진옥","서울 종로구 종로3길 32"],["광화문미진","서울 종로구 종로 19"],["광화문국밥","서울 중구 세종대로21길 53"],["우육면관 광화문점","서울 종로구 종로7길 29-14"],["무탄 광화문점","서울 종로구 새문안로 68"],["우아라","서울 종로구 종로1길 50"],["해목 경복궁점","서울 종로구 자하문로 26-1"],["칸다소바 경복궁점","서울 종로구 자하문로7길 5"],["광화문뚝감","서울 종로구 새문안로3길 21"],["모던샤브하우스 광화문점","서울 종로구 종로3길 17"],["종로도담","서울 종로구 삼봉로 78"],["잘빠진메밀 서촌본점","서울 종로구 자하문로11길 4"],["서촌계단집","서울 종로구 자하문로1길 15"],["만석꾼","서울 종로구 자하문로2길 9"],["서촌전통순대국","서울 종로구 사직로9가길 8"]];const geoCache=new Map();
 
 const DATA_KEY='darok-v074-current-dataset'; // Retain v0.7.4 storage key for migration
 function persistData(){
@@ -105,12 +105,16 @@ async function importBackup(file){
 }
 function zoomToDelivery(){
   if(!map)return;
+  stopMarkerPulse();
   const valid=groups.filter(g=>g.lat!==null&&g.lng!==null);
   if(!valid.length)return;
   const b=new kakao.maps.LatLngBounds();
   valid.forEach(g=>b.extend(new kakao.maps.LatLng(g.lat,g.lng)));
-  map.setBounds(b,70,55,70,55);
-  if(map.getLevel()>5)map.setLevel(5);
+  // Let Kakao choose the level required to contain every geocoded destination.
+  // A hard cap of level 5 previously excluded far-away centers.
+  map.relayout();
+  if(valid.length===1){map.setCenter(new kakao.maps.LatLng(valid[0].lat,valid[0].lng));map.setLevel(3);}
+  else map.setBounds(b,70,55,70,55);
 }
 
 function status(t,bad=false){$('notice').textContent=t;$('notice').className=bad?'error':'ok'}
@@ -142,6 +146,7 @@ function itemDetailHtml(r){let a=deliveryItems(r);return a.length>2?'<details cl
 function phoneDigits(v){return String(v||'').replace(/[^0-9+]/g,'')}
 function changeState(id,value){const r=records.find(x=>x.id===id);if(!r||r.state===value)return;let reason=value==='배송불가'?prompt('배송불가 사유를 입력하세요','부재'):'';if(reason===null)return;r.state=value;r.reason=reason.trim();r.processedAt=value==='대기'?null:new Date().toISOString();persistData();const g=groups.find(x=>x.items.some(y=>y.id===id));if(g&&$('detailPanel').classList.contains('open')){detailStableAddress=g.address;detailStableIds=detailStableAddress===g.address?(detailStableIds||g.items.map(x=>x.id)):null;showDetail(g.address,true)}render();drawMarkers()}
 function showDetail(address,keepOrder=false){
+ stopMarkerPulse();
  const selectionChanged=highlightedAddress!==address;
  highlightedAddress=address;
  if(selectionChanged&&map)drawMarkers();
@@ -201,6 +206,17 @@ function bubbleAt(g,coLocated){
  content.querySelectorAll('[data-addr]').forEach(b=>b.onclick=()=>{const target=groups.find(x=>x.address===b.dataset.addr);if(target){closeBubble();showDetail(target.address)}});
  activeBubble=new kakao.maps.CustomOverlay({position:new kakao.maps.LatLng(g.lat,g.lng),content,clickable:true,yAnchor:1.2,zIndex:20});activeBubble.setMap(map)
 }
+function stopMarkerPulse(){
+ if(pulseTimer){clearInterval(pulseTimer);pulseTimer=null;}
+ highlightedAddress=null;pulseOn=true;
+}
+function startMarkerPulse(address){
+ stopMarkerPulse();highlightedAddress=address;pulseOn=true;
+ pulseTimer=setInterval(()=>{
+  if(!highlightedAddress){stopMarkerPulse();return;}
+  pulseOn=!pulseOn;drawMarkers();
+ },850);
+}
 function drawMarkers(){
  closeBubble();markers.forEach(m=>m.setMap(null));markers=[];
  if(routeLine){routeLine.setMap(null);routeLine=null}if(!map)return;
@@ -214,7 +230,7 @@ function drawMarkers(){
  for(const nearby of coords.values()){
   const g=nearby[0],states=nearby.map(groupStatus);
   const st=states.every(x=>x==='완료')?'완료':states.some(x=>x==='일부'||x==='완료')?'일부':'대기';
-  const isHighlighted=nearby.some(x=>x.address===highlightedAddress);
+  const isHighlighted=pulseOn&&nearby.some(x=>x.address===highlightedAddress);
   const color=isHighlighted?'#dc2626':st==='완료'?'#199b59':st==='일부'?'#FF9500':'#2875c8';
   const seq=order.indexOf(g.address),badCount=nearby.reduce((n,x)=>n+x.items.filter(y=>y.state==='배송불가').length,0);
   const label=nearby.length>1?String(nearby.length):seq>=0?String(seq+1):'';
@@ -224,7 +240,7 @@ function drawMarkers(){
   const image=new kakao.maps.MarkerImage(url,new kakao.maps.Size(size,size),{offset:new kakao.maps.Point(size/2,size/2)});
   const marker=new kakao.maps.Marker({position:new kakao.maps.LatLng(g.lat,g.lng),image,zIndex:isHighlighted?100:10});
   marker.setMap(map);markers.push(marker);
-  kakao.maps.event.addListener(marker,'click',()=>{highlightedAddress=g.address;drawMarkers();if(routeMode){if(nearby.length===1)selectBuilding(g.address);else bubbleRouteChoices(nearby)}else bubbleAt(g,nearby)});
+  kakao.maps.event.addListener(marker,'click',()=>{stopMarkerPulse();if(routeMode){if(nearby.length===1)selectBuilding(g.address);else bubbleRouteChoices(nearby)}else bubbleAt(g,nearby)});
   if(badCount){const badge=document.createElement('span');badge.className='markerBad';badge.textContent='불가 '+badCount;const overlay=new kakao.maps.CustomOverlay({position:new kakao.maps.LatLng(g.lat,g.lng),content:badge,yAnchor:2.0,zIndex:11});overlay.setMap(map);markers.push(overlay)}
  }
  const markerCount=$('markerCount');if(markerCount)markerCount.textContent=`지도 배송처 ${coords.size}곳 표시`;
@@ -252,15 +268,12 @@ function focusPendingRecipient(){
  }
  pendingMapRecipient=null;
  const pos=new kakao.maps.LatLng(g.lat,g.lng);
- highlightedAddress=g.address;
  map.relayout();map.setCenter(pos);map.setLevel(3);
- drawMarkers();
- // Detail panel handles the map offset for newly selected destinations.
- detailStableAddress=null;detailStableIds=null;showDetail(g.address);
- const panel=$('detailPanel');const recipient=[...panel.querySelectorAll('[data-recipient-id]')].find(el=>el.dataset.recipientId===id);
- if(recipient){recipient.classList.add('focusRecipient');recipient.scrollIntoView({block:'nearest',behavior:'instant'});}
+ $('detailPanel').classList.remove('open');
+ detailStableAddress=null;detailStableIds=null;
+ startMarkerPulse(g.address);drawMarkers();
 }
-function switchTab(tab){document.body.classList.toggle('mapTab',tab==='map');$('tabMap').classList.toggle('active',tab==='map');$('tabList').classList.toggle('active',tab==='list');if(tab==='map'&&map)setTimeout(()=>{map.relayout();drawMarkers();if(pendingMapRecipient){focusPendingRecipient()}else zoomToDelivery()},160)}$('tabList').onclick=()=>switchTab('list');$('tabMap').onclick=()=>switchTab('map');window.addEventListener('DOMContentLoaded',()=>{const found=initCourseStorage();if(!found)sample();refreshCourses();$('mapRouteMount').appendChild($('routeControls'));initTimer();loadSdk()});$('sample').onclick=sample;$('backup').onclick=backupData;$('restoreBackup').onchange=async e=>{if(e.target.files[0])await importBackup(e.target.files[0]);e.target.value=''};$('closeDetail').onclick=()=>{$('detailPanel').classList.remove('open');detailStableIds=null;detailStableAddress=null;highlightedAddress=null;drawMarkers()};$('hide').checked=localStorage.getItem('darok-hide-complete')==='1';$('hide').onchange=()=>{localStorage.setItem('darok-hide-complete',$('hide').checked?'1':'0');render();drawMarkers()};$('reset').onclick=()=>{if(!confirm('모든 배송 상태를 배송중으로 초기화할까요? 완료시각도 초기화됩니다.'))return;records.forEach(r=>{r.state='대기';r.reason='';r.processedAt=null});persistData();render();drawMarkers()};$('startRoute').onclick=()=>beginRoute();$('saveRoute').onclick=saveRoute;$('resetSavedRoute').onclick=()=>{if(!confirm('저장된 배송순서를 초기화할까요? 배송기록은 유지됩니다.'))return;previousRoute=[...savedRoute];savedRoute=[];routeDraft=[];routeMode=false;localStorage.setItem(datasetKey,JSON.stringify({route:[],previous:previousRoute}));render();drawMarkers()};document.querySelectorAll('[data-filter]').forEach(b=>b.onclick=()=>{listFilter=b.dataset.filter;render()});
+function switchTab(tab){if(tab==='list')stopMarkerPulse();document.body.classList.toggle('mapTab',tab==='map');$('tabMap').classList.toggle('active',tab==='map');$('tabList').classList.toggle('active',tab==='list');if(tab==='map'&&map)setTimeout(()=>{map.relayout();drawMarkers();if(pendingMapRecipient){focusPendingRecipient()}else zoomToDelivery()},160)}$('tabList').onclick=()=>switchTab('list');$('tabMap').onclick=()=>switchTab('map');window.addEventListener('DOMContentLoaded',()=>{const found=initCourseStorage();if(!found)sample();refreshCourses();$('mapRouteMount').appendChild($('routeControls'));initTimer();loadSdk()});$('sample').onclick=sample;$('backup').onclick=backupData;$('restoreBackup').onchange=async e=>{if(e.target.files[0])await importBackup(e.target.files[0]);e.target.value=''};$('closeDetail').onclick=()=>{$('detailPanel').classList.remove('open');detailStableIds=null;detailStableAddress=null;stopMarkerPulse();drawMarkers()};$('hide').checked=localStorage.getItem('darok-hide-complete')==='1';$('hide').onchange=()=>{localStorage.setItem('darok-hide-complete',$('hide').checked?'1':'0');render();drawMarkers()};$('reset').onclick=()=>{if(!confirm('모든 배송 상태를 배송중으로 초기화할까요? 완료시각도 초기화됩니다.'))return;records.forEach(r=>{r.state='대기';r.reason='';r.processedAt=null});persistData();render();drawMarkers()};$('startRoute').onclick=()=>beginRoute();$('saveRoute').onclick=saveRoute;$('resetSavedRoute').onclick=()=>{if(!confirm('저장된 배송순서를 초기화할까요? 배송기록은 유지됩니다.'))return;previousRoute=[...savedRoute];savedRoute=[];routeDraft=[];routeMode=false;localStorage.setItem(datasetKey,JSON.stringify({route:[],previous:previousRoute}));render();drawMarkers()};document.querySelectorAll('[data-filter]').forEach(b=>b.onclick=()=>{listFilter=b.dataset.filter;render()});
 $('csv').onchange=async e=>{let f=e.target.files[0];if(f)parseCsv(await f.text())};
 
 
