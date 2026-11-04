@@ -82,7 +82,7 @@ body.courseTab .wrap{display:none!important}
 body:not(.courseTab) #coursePage{display:none}
 @media(min-width:751px){.wrap{height:calc(100vh - 115px)}.mobileNav{max-width:none}.mobileNav button{max-width:260px}}
 @media(max-width:750px){.wrap{display:block}.mapArea{display:none}body.mapTab .mapArea{display:block}body.mapTab aside{display:none}}
-</style></head><body><header><h1>다록 DAROK</h1></header><div class="mobileNav"><button id="tabCourses">코스 등록</button><button id="tabList" class="active">배송현황</button><button id="tabMap">배송하기</button></div><div id="coursePage"><h2>코스 등록</h2><div id="coursePageMount"></div></div><div class="wrap"><aside><h2 class="statusHeading">배송현황</h2><div id="currentCourseLabel" class="currentCourseLabel"></div><section id="courseManager" style="border:1px solid #bfd3e9;border-radius:10px;padding:10px;margin-bottom:10px;background:#f1f7fd"><b>배송 코스</b><div class="line"><select id="courseSelect" style="flex:1;min-width:0" aria-label="코스 선택"></select><button id="newCourse">+ 새 코스</button></div><div id="courseMeta" style="font-size:12px;color:#526579;margin-bottom:6px"></div><div class="line"><button id="courseImport">CSV 배송목록 등록</button><button id="renameCourse">이름 수정</button><button id="deleteCourse">코스 삭제</button></div><input type="file" id="courseCsv" accept=".csv,text/csv" hidden><small>코스별 배송상태·순서 별도 저장 · 이 기기에서만 보관</small></section><div class="adminOnly"><b>1. 지도 연결</b><p id="notice">카카오 지도를 자동으로 연결하는 중입니다.</p></div><div class="routebox" id="routeControls"><b>배송순서 · 지도에서 지정</b><div id="routeState">배송목록을 불러오세요.</div><div class="line routeSaveRow"><button id="saveRoute" class="primary">순서 저장</button><button id="resetSavedRoute">순서 초기화</button></div><div id="routeList"></div><button id="startRoute" type="button" hidden>순서 정하기</button><small>지도에서 건물을 순서대로 클릭하세요. 같은 건물의 여러 배송은 한 번만 선택합니다. 저장된 경로는 다음 접속에도 유지됩니다(현재 브라우저).</small></div><div id="settingsData"><div class="line"><button id="backup">배송기록 백업 내려받기</button><label>백업 복원 <input id="restoreBackup" type="file" accept=".json,application/json"></label></div><div id="storageHint" style="font-size:12px;color:#167047;margin:5px 0">배송 상태는 이 기기에 자동 저장됩니다.</div><b>오늘의 배송</b><div class="line"><button id="sample">샘플 30건 (목표 16곳)</button><input id="csv" type="file" accept=".csv,text/csv"><button id="reset">상태 초기화</button></div><small>CSV 열: 수령인,배송대상,주소,상세주소,수량,배달순서,상호명,건물명,연락처,배송메모(선택). UTF-8 권장. 같은 건물은 동일한 기본주소로 입력하세요.</small></div><p id="stats"></p><div id="timePanel" class="routebox"><b>배송시간 (선택)</b><div id="timeStatus">시작 전</div><div class="line"><button id="startTime">배송 시작</button><button id="endTime">배송 종료</button></div></div><h3 class="filterHeading">배송현황별 조회</h3><div id="filterPanel" class="line"><button data-filter="전체">전체</button><button data-filter="대기" class="activeFilter">배송중</button><button data-filter="배송완료">배송완료</button><button data-filter="배송불가">배송불가</button></div><div id="list"></div></aside><div class="mapArea"><div id="mapTools"><button id="toggleRouteTools" type="button">순서 설정 ▾</button><button id="fitAll" type="button" aria-label="배송처 전체 보기">전체 보기</button><label><input type="checkbox" id="hide"> 완료 숨기기</label></div><div id="mapRouteMount" class="routeDrawer"></div><div id="map" aria-label="카카오 지도"></div><div class="mapHint">배송처를 누르면 길찾기·전화·문자·상태 변경을 할 수 있습니다. 파랑=배송중, 주황=일부 처리, 초록=전체 처리.</div></div></div><section id="detailPanel" role="dialog" aria-label="배송처 상세정보"><button class="close" id="closeDetail">닫기 ✕</button><div id="detailBody"></div></section><script>
+</style></head><body><header><h1>다록 DAROK</h1></header><div class="mobileNav"><button id="tabCourses">코스 등록</button><button id="tabList" class="active">배송현황</button><button id="tabMap">배송하기</button></div><div id="coursePage"><h2>코스 등록</h2><div id="coursePageMount"></div></div><div class="wrap"><aside><h2 class="statusHeading">배송현황</h2><div id="currentCourseLabel" class="currentCourseLabel"></div><section id="courseManager" style="border:1px solid #bfd3e9;border-radius:10px;padding:10px;margin-bottom:10px;background:#f1f7fd"><b>배송 코스</b><div class="line"><select id="courseSelect" style="flex:1;min-width:0" aria-label="코스 선택"></select><button id="newCourse">+ 새 코스</button></div><div id="courseMeta" style="font-size:12px;color:#526579;margin-bottom:6px"></div><div class="line"><button id="courseImport">CSV 배송목록 등록</button><button id="renameCourse">이름 수정</button><button id="deleteCourse">코스 삭제</button></div><input type="file" id="courseCsv" accept=".csv,text/csv" hidden><small>코스별 배송상태·순서 별도 저장 · 이 기기에서만 보관</small></section><div class="adminOnly"><b>1. 지도 연결</b><p id="notice">카카오 지도를 자동으로 연결하는 중입니다.</p></div><div class="routebox" id="routeControls"><b>배송순서 · 지도에서 지정</b><div id="routeState">배송목록을 불러오세요.</div><div class="line routeSaveRow"><button id="saveRoute" class="primary">순서 저장</button><button id="resetSavedRoute">순서 초기화</button></div><div id="routeList"></div><button id="startRoute" type="button" hidden>순서 정하기</button><small>지도에서 건물을 순서대로 클릭하세요. 같은 건물의 여러 배송은 한 번만 선택합니다. 저장된 경로는 다음 접속에도 유지됩니다(현재 브라우저).</small></div><div id="settingsData"><div class="line"><button id="backup">배송기록 백업 내려받기</button><label>백업 복원 <input id="restoreBackup" type="file" accept=".json,application/json"></label></div><div id="storageHint" style="font-size:12px;color:#167047;margin:5px 0">배송 상태는 이 기기에 자동 저장됩니다.</div><b>오늘의 배송</b><div class="line"><button id="sample">샘플 30건 (목표 16곳)</button><input id="csv" type="file" accept=".csv,text/csv"><button id="reset">상태 초기화</button></div><small>CSV 열: 배송순서,수령인,연락처,주소,상세주소,건물명,상호명,제공대상1,수량1 … 제공대상10,수량10,비고(메모). 기존 양식도 지원. UTF-8/엑셀 ANSI 지원. 같은 건물은 동일한 기본주소로 입력하세요.</small></div><p id="stats"></p><div id="timePanel" class="routebox"><b>배송시간 (선택)</b><div id="timeStatus">시작 전</div><div class="line"><button id="startTime">배송 시작</button><button id="endTime">배송 종료</button></div></div><h3 class="filterHeading">배송현황별 조회</h3><div id="filterPanel" class="line"><button data-filter="전체">전체</button><button data-filter="대기" class="activeFilter">배송중</button><button data-filter="배송완료">배송완료</button><button data-filter="배송불가">배송불가</button></div><div id="list"></div></aside><div class="mapArea"><div id="mapTools"><button id="toggleRouteTools" type="button">순서 설정 ▾</button><button id="fitAll" type="button" aria-label="배송처 전체 보기">전체 보기</button><label><input type="checkbox" id="hide"> 완료 숨기기</label></div><div id="mapRouteMount" class="routeDrawer"></div><div id="map" aria-label="카카오 지도"></div><div class="mapHint">배송처를 누르면 길찾기·전화·문자·상태 변경을 할 수 있습니다. 파랑=배송중, 주황=일부 처리, 초록=전체 처리.</div></div></div><section id="detailPanel" role="dialog" aria-label="배송처 상세정보"><button class="close" id="closeDetail">닫기 ✕</button><div id="detailBody"></div></section><script>
 const KAKAO_JS_KEY = (window.BAEDALMAP_CONFIG && window.BAEDALMAP_CONFIG.kakaoJavaScriptKey) || '';
 const $=id=>document.getElementById(id);let map,geocoder,markers=[],records=[],groups=[];let pendingMapRecipient=null;let highlightedAddress=null;let pulseTimer=null;let pulseOn=true;let savedRoute=[],previousRoute=[],routeDraft=[],routeMode=false,routeLine=null,datasetKey="",listFilter="전체",detailStableAddress=null,detailStableIds=null;const SAMPLE_ADDR='서울 종로구 사직로8길 4';const food=[["청진옥","서울 종로구 종로3길 32"],["광화문미진","서울 종로구 종로 19"],["광화문국밥","서울 중구 세종대로21길 53"],["우육면관 광화문점","서울 종로구 종로7길 29-14"],["무탄 광화문점","서울 종로구 새문안로 68"],["우아라","서울 종로구 종로1길 50"],["해목 경복궁점","서울 종로구 자하문로 26-1"],["칸다소바 경복궁점","서울 종로구 자하문로7길 5"],["광화문뚝감","서울 종로구 새문안로3길 21"],["모던샤브하우스 광화문점","서울 종로구 종로3길 17"],["종로도담","서울 종로구 삼봉로 78"],["잘빠진메밀 서촌본점","서울 종로구 자하문로11길 4"],["서촌계단집","서울 종로구 자하문로1길 15"],["만석꾼","서울 종로구 자하문로2길 9"],["서촌전통순대국","서울 종로구 사직로9가길 8"]];const geoCache=new Map();
 
@@ -140,28 +140,106 @@ function status(t,bad=false){$('notice').textContent=t;$('notice').className=bad
 function loadSdk(){const key=KAKAO_JS_KEY.trim();if(!key||key==='여기에_JavaScript_키를_한번만_입력')return status('초기 설정이 필요합니다. config.js 파일에 카카오 JavaScript 키를 최초 한 번만 등록해 주세요.',true);if(window.kakao?.maps){initMap();return}let old=document.getElementById('kakao-sdk');if(old)old.remove();const s=document.createElement('script');s.id='kakao-sdk';s.src='https://dapi.kakao.com/v2/maps/sdk.js?autoload=false&libraries=services&appkey='+encodeURIComponent(key);s.onload=()=>{if(!window.kakao?.maps)return status('SDK를 불러오지 못했습니다. 키와 앱 설정을 확인하세요.',true);kakao.maps.load(initMap)};s.onerror=()=>status('카카오 SDK 로딩 실패: 키, 등록 도메인, 카카오맵 사용 권한을 확인하세요.',true);document.head.appendChild(s)}
 function initMap(){map=new kakao.maps.Map($('map'),{center:new kakao.maps.LatLng(37.572,126.976),level:5,minLevel:1,maxLevel:14});geocoder=new kakao.maps.services.Geocoder();status('지도 연결 완료. 배송자료를 불러오는 중입니다.');if(records.length)geocodeAll()}
 function sample(){if(records.length&&!confirm('현재 배송목록을 샘플 30건으로 교체할까요? 기존 배송기록은 덮어써집니다.'))return;records=[];food.forEach((f,i)=>records.push({id:'s'+i,name:f[0],product:i%3===0?'신문 A':'신문 B',address:f[1],detail:'식당 배송 · 가상 주문',business:f[0],building:'',phone:'010-8854-1576',memo:'',qty:1,order:i+1,state:'대기',reason:''}));for(let i=0;i<15;i++)records.push({id:'a'+i,name:'가상 수령인 '+(i+1),product:i%2?'신문 A':'신문 B',address:SAMPLE_ADDR,detail:'101동 '+(101+i)+'호 (가상)',business:'',building:'광화문풍림스페이스본',phone:'010-8854-1576',memo:'',qty:1,order:16+i,state:'대기',reason:''});activateDataset();persistData();status('샘플 30건 등록: 서로 다른 주소의 식당 15곳 + 아파트 15세대(한 건물). 주문과 수령인은 가상입니다.');render();if(map)geocodeAll()}
-function parseCsv(txt){if(records.length&&!confirm('현재 배송목록을 새 CSV로 교체할까요? 기존 기록은 덮어써집니다.'))return;let lines=txt.replace(/^\uFEFF/,'').trim().split(/\r?\n/);function cells(line){let out=[],v='',q=false;for(let i=0;i<line.length;i++){let c=line[i];if(c==='"'){if(q&&line[i+1]==='"'){v+='"';i++}else q=!q}else if(c===','&&!q){out.push(v);v=''}else v+=c}out.push(v);return out}let header=cells(lines.shift()).map(s=>s.trim());let idx=(...names)=>header.findIndex(x=>names.includes(x));let get=(a,n)=>{let k=idx(...n);return k<0?'':(a[k]||'').trim()};records=lines.filter(Boolean).map((l,i)=>{let a=cells(l);return{id:'c'+i,name:get(a,['수령인','독자명','이름'])||'수령인 '+(i+1),product:get(a,['배송대상','배달신문','신문명','품목'])||'배송물품',address:get(a,['주소','도로명주소']),detail:get(a,['상세주소','동호수']),business:get(a,['상호명','상호','업체명','가게명']),building:get(a,['건물명','아파트명','빌라명']),phone:get(a,['연락처','전화번호','휴대전화','휴대폰']),memo:get(a,['배송메모','배송요청','주의사항','비고']),qty:Number(get(a,['수량','부수']))||1,order:Number(get(a,['배달순서','순서']))||i+1,state:'대기',reason:''}}).filter(x=>x.address);activateDataset();persistData();render();status('CSV '+records.length+'건 등록');refreshCourses();if(map)geocodeAll()}
+// Import either the legacy 10-column CSV or the new 28-column common template.
+// A complete parse/validation occurs before replacing any course data.
+function csvRows(text){
+ const rows=[];let row=[],cell='',quoted=false;
+ text=String(text).replace(/^\uFEFF/,'');
+ for(let i=0;i<text.length;i++){
+  const c=text[i];
+  if(c==='"') {if(quoted&&text[i+1]==='"'){cell+='"';i++}else quoted=!quoted;}
+  else if(c===','&&!quoted){row.push(cell);cell='';}
+  else if((c==='\n'||c==='\r')&&!quoted){if(c==='\r'&&text[i+1]==='\n')i++;row.push(cell);if(row.some(x=>x.trim()))rows.push(row);row=[];cell='';}
+  else cell+=c;
+ }
+ if(quoted)throw Error('CSV 따옴표가 닫히지 않았습니다.');
+ row.push(cell);if(row.some(x=>x.trim()))rows.push(row);
+ return rows;
+}
+function parseCsv(txt){
+ let lines,header,parsed;
+ try{
+  lines=csvRows(txt);if(lines.length<2)throw Error('헤더와 배송자료가 필요합니다.');
+  header=lines.shift().map(x=>x.trim().replace(/^\uFEFF/,''));
+  const idx=(...names)=>header.findIndex(x=>names.includes(x));
+  const get=(a,...names)=>{const k=idx(...names);return k<0?'':String(a[k]??'').trim()};
+  if(idx('수령인','독자명','이름')<0||idx('주소','도로명주소')<0)throw Error('필수 열인 수령인과 주소가 없습니다.');
+  const common=idx('제공대상1')>=0;
+  parsed=lines.map((a,i)=>{
+   const name=get(a,'수령인','독자명','이름');
+   const address=get(a,'주소','도로명주소');
+   if(!name||!address)throw Error((i+2)+'행: 수령인 또는 주소가 비어 있습니다.');
+   const items=[];
+   if(common){for(let j=1;j<=10;j++){
+    const item=get(a,'제공대상'+j),qtyRaw=get(a,'수량'+j);
+    if(!item&&qtyRaw)throw Error((i+2)+'행: 제공대상'+j+' 없이 수량만 입력되었습니다.');
+    if(!item)continue;
+    if(qtyRaw&&(!/^\d+(?:\.\d+)?$/.test(qtyRaw)||Number(qtyRaw)<=0))throw Error((i+2)+'행: 수량'+j+'은 양수여야 합니다.');
+    items.push({name:item,qty:qtyRaw===''?null:Number(qtyRaw)});
+   }}else{
+    const item=get(a,'배송대상','배달신문','신문명','품목')||'배송물품';
+    const q=get(a,'수량','부수');items.push({name:item,qty:q?Number(q)||1:1});
+   }
+   const seq=get(a,'배송순서','배달순서','순서');
+   if(seq&&(!/^\d+$/.test(seq)||Number(seq)<1))throw Error((i+2)+'행: 배송순서는 1 이상의 정수여야 합니다.');
+   return {id:'c'+i,name,product:items[0]?.name||'',items,address,
+    detail:get(a,'상세주소','동호수'),business:get(a,'상호명','상호','업체명','가게명'),
+    building:get(a,'건물명','아파트명','빌라명'),phone:get(a,'연락처','전화번호','휴대전화','휴대폰'),
+    memo:get(a,'비고(메모)','배송메모','배송요청','주의사항','비고'),
+    qty:items[0]?.qty??null,order:seq?Number(seq):i+1,state:'대기',reason:''};
+  });
+  if(!parsed.length)throw Error('등록할 배송처가 없습니다.');
+ }catch(e){alert('CSV 등록 중단: '+e.message+'\n기존 코스는 변경되지 않았습니다.');return false;}
+ // Preserve statuses when updating a course, including the former name/business swap.
+ const prior=new Map();
+ for(const r of records){
+  const key=normalize(r.address)+'|'+phoneDigits(r.phone);
+  if(!prior.has(key))prior.set(key,[]);prior.get(key).push(r);
+ }
+ let retained=0;
+ for(const r of parsed){
+  const key=normalize(r.address)+'|'+phoneDigits(r.phone);
+  const candidates=prior.get(key)||[];
+  let k=candidates.findIndex(old=>old.name===r.name||old.business===r.name||old.name===r.business);
+  if(k<0&&candidates.length===1)k=0;
+  if(k>=0){const old=candidates.splice(k,1)[0];r.id=old.id;r.state=old.state;r.reason=old.reason;r.processedAt=old.processedAt;retained++;}
+ }
+ if(records.length&&!confirm('현재 코스 '+records.length+'건을 CSV '+parsed.length+'건으로 갱신할까요?\n기존 배송상태가 일치하는 '+retained+'건은 유지됩니다.\n등록되지 않은 기존 배송처는 코스에서 제외됩니다.\n다른 코스는 변경되지 않습니다.'))return false;
+ records=parsed;activateDataset();persistData();render();refreshCourses();if(map)geocodeAll();
+ status('CSV '+records.length+'건 등록 · 기존 상태 '+retained+'건 유지');
+ return true;
+}
+async function readCsvFile(file){
+ const bytes=await file.arrayBuffer();
+ let txt=new TextDecoder('utf-8',{fatal:false}).decode(bytes);
+ if(txt.includes('\uFFFD'))txt=new TextDecoder('euc-kr').decode(bytes); // Excel ANSI (CP949)
+ return txt;
+}
 function normalize(a){return a.trim().replace(/\s+/g,' ')}
 function activateDataset(){geoCache.clear();const addresses=[...new Set(records.map(r=>normalize(r.address)))].sort();datasetKey='baedal-route-v06:'+addresses.join('|');let raw=localStorage.getItem(datasetKey);try{let obj=raw?JSON.parse(raw):{};savedRoute=Array.isArray(obj.route)?obj.route.filter(x=>addresses.includes(x)):[];previousRoute=Array.isArray(obj.previous)?obj.previous.filter(x=>addresses.includes(x)):[]}catch(e){savedRoute=[];previousRoute=[]}routeMode=false;routeDraft=[];groupData();updateRouteUI()}
 function routeOrder(){return routeMode?routeDraft:savedRoute}
 function beginRoute(){if(!records.length)return alert('먼저 배송목록을 불러오세요.');routeDraft=[...savedRoute];routeMode=true;updateRouteUI();drawMarkers();switchTab('map')}
 function selectBuilding(address){if(!routeMode)return;const a=normalize(address);if(routeDraft.includes(a)){routeDraft=routeDraft.filter(x=>x!==a);updateRouteUI();drawMarkers();return}routeDraft.push(a);updateRouteUI();drawMarkers()}
 function saveRoute(){if(!routeMode)return;previousRoute=[...savedRoute];savedRoute=[...routeDraft];localStorage.setItem(datasetKey,JSON.stringify({route:savedRoute,previous:previousRoute}));routeMode=false;routeDraft=[];saveActiveCourse();updateRouteUI();render();drawMarkers();closeRouteDrawer();alert('배송순서가 저장되었습니다.')}
-function titleFor(g){let r=g.items[0];if(r.building)return r.building+(r.detail?.match(/\d+동/)?.[0]?' '+r.detail.match(/\d+동/)[0]:'');if(r.business)return r.business;if(g.items.length===1)return r.detail&&r.detail!=='식당 배송 · 가상 주문'?r.detail:r.name;return '배송처 '+g.items.length+'건'}
+function titleFor(g){let r=g.items[0];if(r.building)return r.building+(r.detail?.match(/\d+동/)?.[0]?' '+r.detail.match(/\d+동/)[0]:'');if(/센터$/.test(String(r.name||'').trim()))return r.name;if(r.business)return r.business;if(g.items.length===1)return r.detail&&r.detail!=='식당 배송 · 가상 주문'?r.detail:r.name;return '배송처 '+g.items.length+'건'}
 function escapeHtml(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function deliveryItems(r){if(Array.isArray(r.items)&&r.items.length)return r.items.map(x=>({name:String(x.name||x.product||'배송물품'),qty:Number(x.qty||x.quantity)||1}));return [{name:String(r.product||'배송물품'),qty:Number(r.qty)||1}]}
+function deliveryItems(r){
+ if(Array.isArray(r.items))return r.items.map(x=>({name:String(x.name||x.product||''),qty:x.qty==null||x.qty===''?null:Number(x.qty)})).filter(x=>x.name);
+ return r.product?[{name:String(r.product),qty:Number(r.qty)||1}]:[];
+}
 function itemUnit(name){return /신문|일보|주간지|월간지|잡지|간행물/.test(String(name))?'부':'개'}
 function deliverySummary(r){
- let a=deliveryItems(r);
- const fmt=x=>{const name=String(x.name||'').trim();const qty=Number(x.qty)||1;const unit=itemUnit(name);
-   // Imported CSV sometimes contains an already formatted product list, e.g. '조선일보 1부 + 스포츠조선 1부'.
-   // Do not append a second quantity to that complete description.
-   if(/(?:\d+\s*(?:부|개))(?:\s*(?:[+·,]|및)\s*.+\d+\s*(?:부|개))*$/.test(name))return name;
-   return name+' '+qty+unit;
- };
- return a.length<=2?a.map(fmt).join(' · '):fmt(a[0])+' 외 '+(a.length-1)+'종 · 총 '+a.reduce((n,x)=>n+(Number(x.qty)||1),0)+'개';
+ const a=deliveryItems(r);
+ if(!a.length)return '제공대상 미입력';
+ return a.map(x=>{
+  const name=x.name.trim();
+  if(x.qty===null||!Number.isFinite(x.qty))return name;
+  if(/(?:\d+\s*(?:부|개))(?:\s*(?:[+·,]|및)\s*.+\d+\s*(?:부|개))*$/.test(name))return name;
+  return name+'('+x.qty+')';
+ }).join(', ');
 }
-function itemDetailHtml(r){let a=deliveryItems(r);return a.length>2?'<details class="itemDetails"><summary>세부정보</summary>'+a.map(x=>'<div>'+escapeHtml(x.name)+' '+x.qty+'개</div>').join('')+'</details>':''}
+function itemDetailHtml(r){return ''}
+
 function phoneDigits(v){return String(v||'').replace(/[^0-9+]/g,'')}
 function changeState(id,value){const r=records.find(x=>x.id===id);if(!r||r.state===value)return;let reason=value==='배송불가'?prompt('배송불가 사유를 입력하세요','부재'):'';if(reason===null)return;r.state=value;r.reason=reason.trim();r.processedAt=value==='대기'?null:new Date().toISOString();persistData();const g=groups.find(x=>x.items.some(y=>y.id===id));if(g&&$('detailPanel').classList.contains('open')){detailStableAddress=g.address;detailStableIds=detailStableAddress===g.address?(detailStableIds||g.items.map(x=>x.id)):null;showDetail(g.address,true)}render();drawMarkers()}
 function showDetail(address,keepOrder=false){
@@ -177,7 +255,7 @@ function showDetail(address,keepOrder=false){
  if(keepOrder&&detailStableIds)sorted.sort((a,b)=>detailStableIds.indexOf(a.id)-detailStableIds.indexOf(b.id));detailStableIds=sorted.map(x=>x.id);
  sorted.forEach((r,i)=>{
   let phone=phoneDigits(r.phone),nav=g.lat!==null?'https://map.kakao.com/link/to/'+encodeURIComponent(titleFor(g))+','+g.lat+','+g.lng:'';
-  let title=(g.items.length>1?`<div class="recipientTitle">${escapeHtml(r.business||r.name)} ${r.detail&&r.detail!=='식당 배송 · 가상 주문'?escapeHtml(r.detail):''}</div>`:(r.detail&&r.detail!=='식당 배송 · 가상 주문'?`<div class="recipientSub">${escapeHtml(r.detail)}</div>`:''));
+  let title=(g.items.length>1?`<div class="recipientTitle">${escapeHtml(/센터$/.test(String(r.name||'').trim())?r.name:(r.business||r.name))} ${r.detail&&r.detail!=='식당 배송 · 가상 주문'?escapeHtml(r.detail):''}</div>`:(r.detail&&r.detail!=='식당 배송 · 가상 주문'?`<div class="recipientSub">${escapeHtml(r.detail)}</div>`:''));
   h+=`<div class="person ${i%2===0?'personOdd':'personEven'}" data-recipient-id="${escapeHtml(r.id)}"><div class="recipientIndex">${i+1}번 수령인 · 총 ${sorted.length}명</div>${title}<div class="deliveryItems">${escapeHtml(deliverySummary(r))}</div>${itemDetailHtml(r)}${r.memo?`<div class="deliveryMemo">배송메모: ${escapeHtml(r.memo)}</div>`:''}<div class="contactActions"><a ${nav?`href="${nav}" target="_blank" rel="noopener"`:'class="disabledAction"'}>길찾기</a><a ${phone?`href="tel:${phone}"`:'class="disabledAction"'}>☎ 전화</a><a ${phone?`href="sms:${phone}"`:'class="disabledAction"'}>✉ 문자</a></div>${phone?`<div class="contactNumber">${escapeHtml(r.phone)}</div>`:''}<div class="statusActions"><button class="${r.state==='배송완료'?'done':''}" data-state="배송완료" data-id="${escapeHtml(r.id)}">배송완료</button><button class="${r.state==='배송불가'?'done':''}" data-state="배송불가" data-id="${escapeHtml(r.id)}">배송불가</button><button class="${r.state==='대기'?'done':''}" data-state="대기" data-id="${escapeHtml(r.id)}">배송중</button></div></div>`;
  });
  $('detailBody').innerHTML=h;$('detailPanel').classList.add('open');
@@ -203,7 +281,7 @@ function render(){
   const h=document.createElement('h3');h.textContent=titleFor(g);h.style.cursor='default';box.append(h);const addr=document.createElement('div');addr.className='listAddress';addr.textContent=g.address;box.append(addr);
   g.items.filter(r=>listFilter==='전체'||r.state===listFilter).forEach(r=>{
    const line=document.createElement('div');line.className='item';
-   const label=r.business||r.name;const detail=r.detail&&r.detail!=='식당 배송 · 가상 주문'?r.detail:'';
+   const label=/센터$/.test(String(r.name||'').trim())?r.name:(r.business||r.name);const detail=r.detail&&r.detail!=='식당 배송 · 가상 주문'?r.detail:'';
    const name=document.createElement('div');const displayLabel=(label===titleFor(g)&&g.items.length===1)?'':label;name.innerHTML=`${displayLabel||detail?`<div class="listIdentity">${displayLabel?escapeHtml(displayLabel):''}${detail?(displayLabel?' · ':'')+escapeHtml(detail):''}</div>`:''}<div class="deliveryItems">${escapeHtml(deliverySummary(r))}</div>${itemDetailHtml(r)}<div class="listStatus">배송상태: <strong>${displayState(r.state)}</strong>${r.reason?' · '+escapeHtml(r.reason):''}</div><div class="completionStamp">배송완료시각: <strong>${escapeHtml(completionTime(r))}</strong></div>`;
    line.append(name);
    if(phoneDigits(r.phone)){const contact=document.createElement('div');contact.className='listContact';const a=document.createElement('a');a.href='tel:'+phoneDigits(r.phone);a.textContent='☎ '+r.phone;contact.append(a);line.append(contact)}
@@ -301,7 +379,7 @@ function switchTab(tab){
  $('tabCourses').classList.toggle('active',tab==='courses');
  if(tab==='map'&&map)setTimeout(()=>{map.relayout();drawMarkers();if(pendingMapRecipient){focusPendingRecipient()}else zoomToDelivery()},160);
 }$('tabCourses').onclick=()=>switchTab('courses');$('tabList').onclick=()=>switchTab('list');$('tabMap').onclick=()=>switchTab('map');window.addEventListener('DOMContentLoaded',()=>{const found=initCourseStorage();if(!found)sample();refreshCourses();$('mapRouteMount').appendChild($('routeControls'));initTimer();loadSdk()});$('sample').onclick=sample;$('backup').onclick=backupData;$('restoreBackup').onchange=async e=>{if(e.target.files[0])await importBackup(e.target.files[0]);e.target.value=''};$('closeDetail').onclick=()=>{$('detailPanel').classList.remove('open');detailStableIds=null;detailStableAddress=null;stopMarkerPulse();drawMarkers()};$('hide').checked=localStorage.getItem('darok-hide-complete')==='1';$('hide').onchange=()=>{localStorage.setItem('darok-hide-complete',$('hide').checked?'1':'0');render();drawMarkers()};$('reset').onclick=()=>{if(!confirm('모든 배송 상태를 배송중으로 초기화할까요? 완료시각도 초기화됩니다.'))return;records.forEach(r=>{r.state='대기';r.reason='';r.processedAt=null});persistData();render();drawMarkers()};$('startRoute').onclick=()=>beginRoute();$('saveRoute').onclick=saveRoute;$('resetSavedRoute').onclick=()=>{if(!confirm('저장된 배송순서를 초기화할까요? 배송기록은 유지됩니다.'))return;previousRoute=[...savedRoute];savedRoute=[];routeDraft=[];routeMode=false;localStorage.setItem(datasetKey,JSON.stringify({route:[],previous:previousRoute}));render();drawMarkers()};document.querySelectorAll('[data-filter]').forEach(b=>b.onclick=()=>{listFilter=b.dataset.filter;render()});
-$('csv').onchange=async e=>{let f=e.target.files[0];if(f)parseCsv(await f.text())};
+$('csv').onchange=async e=>{let f=e.target.files[0];if(f)parseCsv(await readCsvFile(f))};
 
 
 // v0.8.5 course storage: preserve v0.8.4 DATA_KEY and never delete it on migration.
@@ -321,7 +399,7 @@ $('newCourse').onclick=()=>{const title=prompt('새 코스 제목을 입력하�
 $('renameCourse').onclick=()=>{const c=courseStore.find(x=>x.id===activeCourseId);if(!c)return;const title=prompt('코스 제목',c.title);if(!title?.trim())return;c.title=title.trim();c.updatedAt=new Date().toISOString();writeCourses();refreshCourses()};
 $('deleteCourse').onclick=()=>{if(courseStore.length<=1)return alert('마지막 코스는 삭제할 수 없습니다.');const c=courseStore.find(x=>x.id===activeCourseId);if(!confirm('「'+c.title+'」 코스와 이 기기의 배송기록을 삭제할까요? 되돌릴 수 없습니다.'))return;courseStore=courseStore.filter(x=>x.id!==activeCourseId);writeCourses();loadCourse(courseStore[0])};
 $('courseImport').onclick=()=>{if(!activeCourseId)return alert('먼저 새 코스를 만드세요.');$('courseCsv').click()};
-$('courseCsv').onchange=async e=>{const file=e.target.files[0];e.target.value='';if(!file)return;if(!file.name.toLowerCase().endsWith('.csv'))return alert('엑셀에서 CSV UTF-8 형식으로 저장한 파일을 선택해 주세요.');if(records.length&&!confirm('현재 코스의 배송목록과 상태를 CSV 내용으로 교체할까요? 다른 코스는 유지됩니다.'))return;const text=await file.text();if(!text.trim())return alert('빈 파일입니다.');parseCsv(text);refreshCourses()};
+$('courseCsv').onchange=async e=>{const file=e.target.files[0];e.target.value='';if(!file)return;if(!file.name.toLowerCase().endsWith('.csv'))return alert('엑셀에서 CSV UTF-8 형식으로 저장한 파일을 선택해 주세요.');const text=await readCsvFile(file);if(!text.trim())return alert('빈 파일입니다.');parseCsv(text)};
 
 // v0.8.0: settings, compact route controls, optional automatic draft.
 $('coursePageMount').appendChild($('courseManager'));
