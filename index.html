@@ -418,12 +418,87 @@ $('manualMode').onclick=()=>{routeAutoPanel.style.display='none';$('manualMode')
 $('autoMode').onclick=()=>{routeAutoPanel.style.display='block';$('autoMode').classList.add('active');$('manualMode').classList.remove('active')};
 
 let selectedRouteIndex=-1;
-function updateAutoStart(){let sel=$('autoStart'),old=sel.value;sel.replaceChildren();groups.filter(g=>g.lat!==null&&g.items.some(r=>r.state==='대기')).forEach(g=>{let o=document.createElement('option');o.value=g.address;o.textContent=titleFor(g);sel.append(o)});if([...sel.options].some(o=>o.value===old))sel.value=old}
+function updateAutoStart(){let sel=$('autoStart'),old=sel.value;sel.replaceChildren();groups.filter(g=>g.items.some(r=>r.state==='대기')).forEach(g=>{let o=document.createElement('option');o.value=g.address;o.textContent=titleFor(g);sel.append(o)});if([...sel.options].some(o=>o.value===old))sel.value=old}
 function editRouteList(){let root=$('routeEditList');root.replaceChildren();routeOrder().forEach((addr,i)=>{let row=document.createElement('div');row.className='routeEditor';let b=document.createElement('button');b.textContent=String(i+1);b.style.background=selectedRouteIndex===i?'#cbe5ff':'';b.onclick=()=>{selectedRouteIndex=i;editRouteList()};let label=document.createElement('span');label.textContent=titleFor(groups.find(g=>g.address===addr)||{items:[{name:addr}]});row.append(b,label);root.append(row)})}
 const originalUpdateRouteUI=updateRouteUI;updateRouteUI=function(){originalUpdateRouteUI();updateAutoStart();editRouteList()};
 $('autoRoute').onclick=()=>{const start=$('autoStart').value;let pending=groups.filter(g=>g.lat!==null&&g.items.some(r=>r.state==='대기'));let first=pending.find(g=>g.address===start);if(!first)return alert('시작 배송처를 선택해 주세요.');if(routeMode&&routeDraft.length&&!confirm('현재 작성 중인 순서를 자동 추천으로 교체할까요?'))return;let left=pending.filter(g=>g!==first),ordered=[first],cur=first;while(left.length){let best=0,dist=Infinity;left.forEach((g,i)=>{let dx=(g.lng-cur.lng)*Math.cos(cur.lat*Math.PI/180),dy=g.lat-cur.lat,d=dx*dx+dy*dy;if(d<dist){dist=d;best=i}});cur=left.splice(best,1)[0];ordered.push(cur)}routeDraft=ordered.map(g=>g.address);routeMode=true;selectedRouteIndex=-1;updateRouteUI();drawMarkers();alert('직선거리 기반 추천 초안입니다. 도로 횡단 최소화는 아직 반영되지 않았습니다. 순서를 검토한 뒤 저장하세요.')};
 function moveRoute(delta){if(!routeMode||selectedRouteIndex<0)return;let j=selectedRouteIndex+delta;if(j<1||j>=routeDraft.length)return;[routeDraft[selectedRouteIndex],routeDraft[j]]=[routeDraft[j],routeDraft[selectedRouteIndex]];selectedRouteIndex=j;updateRouteUI();drawMarkers()}
 $('routeUp').onclick=()=>moveRoute(-1);$('routeDown').onclick=()=>moveRoute(1);
+// v0.8.5.8: compact route setup, recommendation review and insert-after revision.
+const routeManage=document.createElement('div');routeManage.className='routeManage';
+routeManage.innerHTML=`<div class="routeManageRow"><button id="routeListToggle" type="button">순서목록</button></div><div id="routeListPanel" hidden></div><div id="autoReview" hidden><div class="routeReviewTitle">자동추천 순서가 지도에 표시되었습니다.</div><div class="routeManageRow"><button id="routePartial" type="button">일부 수정</button><button id="routeAccept" type="button" class="primary">이대로 저장</button></div></div><div id="partialEditor" hidden><label>옮기려는 배달처<select id="moveFrom"></select></label><label>어느 배달처 뒤에 배치할까요?<select id="moveAfter"></select></label><div class="routeManageRow"><button id="applyMove" type="button">순서변경</button><button id="finishPartial" type="button">수정 완료</button></div><div id="moveFeedback" role="status"></div></div>`;
+routeBox.appendChild(routeManage);
+routeModes.querySelector('#manualMode').textContent='직접 순서 정하기';
+routeModes.querySelector('#autoMode').textContent='자동추천 순서';
+$('saveRoute').textContent='순서저장';$('resetSavedRoute').textContent='순서초기화';
+$('saveRoute').insertAdjacentElement('afterend',$('routeListToggle'));
+$('routeList').style.display='none';
+$('routeEditList').style.display='none';$('routeUp').style.display='none';$('routeDown').style.display='none';
+$('autoRoute').textContent='추천 순서 만들기';
+let routePartialMode=false;
+function routeName(addr){const g=groups.find(x=>x.address===addr);return g?titleFor(g):addr}
+function routeChoiceOptions(sel,arr){const old=sel.value;sel.replaceChildren();arr.forEach(({value,label})=>{const opt=document.createElement('option');opt.value=value;opt.textContent=label;sel.append(opt)});if(arr.some(x=>x.value===old))sel.value=old}
+function renderRouteReview(){
+ const order=routeOrder();
+ const list=$('routeListPanel');list.replaceChildren();order.forEach((addr,i)=>{const div=document.createElement('div');div.className='routeSummaryItem';div.textContent=`${i+1}. ${routeName(addr)}`;list.append(div)});
+ const entries=order.map((addr,i)=>({value:addr,label:`${i+1}. ${routeName(addr)}`}));
+ routeChoiceOptions($('moveFrom'),entries);
+ const selected=$('moveFrom').value;
+ routeChoiceOptions($('moveAfter'),[{value:'__FIRST__',label:'맨 앞으로 이동'},...entries.filter(x=>x.value!==selected)]);
+ $('autoReview').hidden=!routeMode||!order.length||routePartialMode||$('autoMode').classList.contains('active')===false;
+ $('partialEditor').hidden=!routePartialMode;
+ $('saveRoute').disabled=!routeMode;
+}
+const routeUpdateBeforeReview=updateRouteUI;
+updateRouteUI=function(){routeUpdateBeforeReview();renderRouteReview()};
+$('routeListToggle').onclick=()=>{const el=$('routeListPanel');el.hidden=!el.hidden;renderRouteReview()};
+$('moveFrom').onchange=()=>{renderRouteReview();$('moveFeedback').textContent=''};
+$('routePartial').onclick=()=>{routePartialMode=true;renderRouteReview()};
+$('finishPartial').onclick=()=>{routePartialMode=false;renderRouteReview()};
+$('routeAccept').onclick=()=>{$('saveRoute').click()};
+$('applyMove').onclick=()=>{
+ if(!routeMode||!routeDraft.length)return;
+ const from=$('moveFrom').value,after=$('moveAfter').value;
+ if(!from||!after||from===after)return alert('서로 다른 배달처를 선택해 주세요.');
+ const next=[...routeDraft];const ix=next.indexOf(from);if(ix<0)return;
+ next.splice(ix,1);
+ const pos=after==='__FIRST__'?0:next.indexOf(after)+1;
+ if(pos<0)return;
+ next.splice(pos,0,from);routeDraft=next;
+ updateRouteUI();drawMarkers();
+ $('moveFeedback').textContent=`${routeName(from)} → ${after==='__FIRST__'?'맨 앞으로':routeName(after)+' 뒤로'} 이동했습니다. 순서저장을 눌러 확정하세요.`;
+};
+const oldManualClick=$('manualMode').onclick;
+$('manualMode').onclick=()=>{routePartialMode=false;$('autoReview').hidden=true;$('partialEditor').hidden=true;oldManualClick();};
+$('autoMode').onclick=()=>{routePartialMode=false;routeAutoPanel.style.display='block';$('autoMode').classList.add('active');$('manualMode').classList.remove('active');updateAutoStart();renderRouteReview()};
+$('autoStart').addEventListener('change',()=>{$('autoStart').dataset.userSelected='1'});
+const originalAutoClick=$('autoRoute').onclick;
+$('autoRoute').onclick=()=>{
+ // A saved first destination is retained when present; otherwise use the selected starting point.
+ updateAutoStart();const firstSaved=savedRoute[0];
+ if(firstSaved&&!$('autoStart').dataset.userSelected&&[...$('autoStart').options].some(o=>o.value===firstSaved))$('autoStart').value=firstSaved;
+ const before=[...routeDraft];originalAutoClick();
+ if(routeMode&&routeDraft.length&&routeDraft!==before){routePartialMode=false;renderRouteReview();}
+};
+const originalSaveClick=$('saveRoute').onclick;
+$('saveRoute').onclick=()=>{originalSaveClick();routePartialMode=false;$('routeListPanel').hidden=true;renderRouteReview()};
+// Prevent the long route list and editor from covering the map.
+const routeCompactStyle=document.createElement('style');routeCompactStyle.textContent=`
+#routeControls>#routeList{display:none!important}
+.routeDrawer.open,.routeDrawer.open:has(.routeAuto[style*="block"]){max-height:min(34dvh,255px)!important;overflow-y:auto!important}
+.routeManageRow{display:flex;gap:6px;margin:5px 0}.routeManageRow button{flex:1}
+#routeListToggle{min-width:0}
+#routeListPanel{max-height:125px;overflow:auto;background:white;border:1px solid #d5e2ee;border-radius:7px;margin:5px 0}
+.routeSummaryItem{font-size:13px;padding:5px 8px;border-bottom:1px solid #eef1f4}
+#partialEditor{background:white;border:1px solid #d5e2ee;border-radius:8px;padding:8px;margin-top:5px}
+#partialEditor label{display:block;font-size:12px;font-weight:700;margin-bottom:6px}
+#partialEditor select{display:block;width:100%;font-size:14px;min-height:37px;margin-top:3px}
+#moveFeedback{font-size:12px;color:#1768b2;line-height:1.4}
+.routeReviewTitle{font-size:12px;font-weight:700;margin-top:5px}
+#routeControls .routeAuto small{display:none!important}
+#routeControls .routeAuto{margin-top:4px;padding-top:4px}
+#routeControls #routeState{font-size:12px}
+`;document.head.append(routeCompactStyle);
 // 지도에서만 배송상태를 변경한다. 기존 상태 코드는 유지한다.
 changeState=function(id,value){
  const r=records.find(x=>x.id===id);if(!r||r.state===value)return;
